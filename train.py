@@ -1,7 +1,7 @@
 import time
 
 def train_and_validate(args):
-    print("Starting Training for {} epochs".format(epochs))
+    print("Starting Training for {} epochs".format(args.epochs))
 
     train_loss, val_loss = [], []
     train_batches, val_batches = 0, 0
@@ -11,9 +11,9 @@ def train_and_validate(args):
         args.model.train()
         for batch in args.dataloaders['train']:
             args.optim.zero_grad()
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            labels = batch['labels'].to(device)
+            input_ids = batch['input_ids'].to(args.device)
+            attention_mask = batch['attention_mask'].to(args.device)
+            labels = batch['labels'].to(args.device)
             outputs = args.model(input_ids, attention_mask=attention_mask, labels=labels)
             loss = outputs[0]
             train_loss.append(loss)
@@ -28,9 +28,9 @@ def train_and_validate(args):
     model.eval()
     for batch in args.dataloaders['val']:
         
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        labels = batch['labels'].to(device)
+        input_ids = batch['input_ids'].to(args.device)
+        attention_mask = batch['attention_mask'].to(args.device)
+        labels = batch['labels'].to(args.device)
         
         outputs = args.model(input_ids, attention_mask=attention_mask, labels=labels)
         loss = outputs[0]

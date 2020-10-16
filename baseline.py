@@ -6,54 +6,51 @@ from train import train_and_validate
 
 
 
-def imdb_baseline(args):
+def baseline(args):
+    """
+    Creates a baseline training run for the IMDb/Yelp dataset.
+
+    params:
+        args (argparser) : List of arguments for training 
+
+    """
 
     print("Loading Datasets")
+    # load and preprocess the datasets.
     args.dataloaders = load_and_preprocess(args, val=True)
     
     print("Creating Model")
-    args.model = BertForSequenceClassification.fro  m_pretrained('bert-base-uncased')
-    args.model.to(args.device)
-
-    args.optim = AdamW(model.parameters(), lr=5e-5)
-    
-    print("Starting Training")
-    train_and_validate(args)
-
-def yelp_baseline(args):
-
-    print("Loading Datasets")
-    args.dataloaders = load_and_preprocess(args.train_path, args.test_path, val=True)
-    
-    print("Creating Model")
+    # load pretrained BERT and push to GPU.
     args.model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
     args.model.to(args.device)
 
-    args.optim = AdamW(model.parameters(), lr=5e-5)
+    # create optimizer
+    args.optim = AdamW(args.model.parameters(), lr=5e-5)
     
     print("Starting Training")
+    # run training.
     train_and_validate(args)
 
-    pass
 
 
 if __name__ == "__main__":
-    # Parse Arguments
+    # Parse Arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs.')
     parser.add_argument('--dataset', type=str, default='IMDb', help='name of the dataset used for fine-tuning.')
     args = parser.parse_args()
 
-    # Add gpu
+    # Add gpu.
     args.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-    # run baselines
+    # run baselines.
     if args.dataset == "IMDb":
-
+        # path to IMDb data.
         args.train_path = "../imdb/aclImdb/train"
         args.test_path = "../imdb/aclImdb/test"
-        imdb_baseline(args)
+        baseline(args)
 
     elif args.dataset == "Yelp":
-
-        yelp_baseline(args)
+        # path to Yelp data.
+        args.data_path = "../yelp/yelp_academic_dataset_review.json"
+        baseline(args)

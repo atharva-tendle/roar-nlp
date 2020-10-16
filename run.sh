@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH --time=168:00:00
 #SBATCH --partition=gpu
-#SBATCH --mem=64gb
+#SBATCH --mem=0
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:2
 #SBATCH --constraint='gpu_32gb&gpu_v100'
