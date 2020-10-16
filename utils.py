@@ -1,6 +1,5 @@
 from pathlib import Path
 import pandas as pd
-from datasets import IMDbDataset
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
@@ -60,12 +59,14 @@ def read_yelp(data_path):
 
     # parse json into a dataframe
     yelp_df = pd.read_json(data_path, lines=True)
+    print(yelp_df.columns)
     # remove columns
     yelp_df = yelp_df[['text', 'stars']]
-
+    print(yelp_df.columns)
     texts = []
     labels = []
     for row in yelp_df.iterrows():
+        print(row)
         texts.append(row['text'])
         # start labels from 0 (auto one hot encode)
         labels.append(int(row['stars']) -1)
