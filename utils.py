@@ -16,10 +16,13 @@ def read_imdb_split(split_dir):
     return texts, labels
 
 
-def load_and_preprocess(train_path, test_path, val=True):
+def load_and_preprocess(args, val=True):
 
-    train_texts, train_labels = read_imdb_split()
-    test_texts, test_labels = read_imdb_split()
+    if args.dataset == "IMDb":
+        train_texts, train_labels = read_imdb_split(args.train_path)
+        test_texts, test_labels = read_imdb_split(args.test_path)
+    elif args.dataset == "Yelp":
+        pass
 
     train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 

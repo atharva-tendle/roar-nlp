@@ -1,10 +1,26 @@
 import torch
 import argparse
 from transformers import BertForSequenceClassification, AdamW
+from utils import load_and_preprocess
+from train import train_and_validate
 
 
 
 def imdb_baseline(args):
+
+    print("Loading Datasets")
+    args.dataloaders = load_and_preprocess(args, val=True)
+    
+    print("Creating Model")
+    args.model = BertForSequenceClassification.fro  m_pretrained('bert-base-uncased')
+    args.model.to(args.device)
+
+    args.optim = AdamW(model.parameters(), lr=5e-5)
+    
+    print("Starting Training")
+    train_and_validate(args)
+
+def yelp_baseline(args):
 
     print("Loading Datasets")
     args.dataloaders = load_and_preprocess(args.train_path, args.test_path, val=True)
@@ -18,7 +34,6 @@ def imdb_baseline(args):
     print("Starting Training")
     train_and_validate(args)
 
-def yelp_baseline(args):
     pass
 
 
@@ -35,8 +50,8 @@ if __name__ == "__main__":
     # run baselines
     if args.dataset == "IMDb":
 
-        args.train_path = "imdb/aclImdb/train"
-        args.test_path = "imdb/aclImdb/test"
+        args.train_path = "../imdb/aclImdb/train"
+        args.test_path = "../imdb/aclImdb/test"
         imdb_baseline(args)
 
     elif args.dataset == "Yelp":

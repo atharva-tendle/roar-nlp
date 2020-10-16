@@ -8,7 +8,7 @@ def train_and_validate(args):
 
     for epoch in range(args.epochs):
         start_epoch = time.time()
-        model.train()
+        args.model.train()
         for batch in args.dataloaders['train']:
             args.optim.zero_grad()
             input_ids = batch['input_ids'].to(device)
@@ -22,20 +22,22 @@ def train_and_validate(args):
             args.optim.step()
 
         print("Epoch: {} - Training loss: {}".format(epoch, sum(train_loss)/train_batches))
+    
+    print("Time for Epoch: {}".format((time.time()-start_epoch)/60))
 
-        model.eval()
-        for batch in args.dataloaders['val']:
-            
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            labels = batch['labels'].to(device)
-            
-            outputs = args.model(input_ids, attention_mask=attention_mask, labels=labels)
-            loss = outputs[0]
-            
-            val_loss.append(loss)
-            val_batches += 1
+    model.eval()
+    for batch in args.dataloaders['val']:
+        
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels = batch['labels'].to(device)
+        
+        outputs = args.model(input_ids, attention_mask=attention_mask, labels=labels)
+        loss = outputs[0]
+        
+        val_loss.append(loss)
+        val_batches += 1
 
-        print("Epoch: {} - Validation loss: {}".format(epoch, sum(val_loss)/val_batches))
+    print("Validation loss: {}".format(sum(val_loss)/val_batches))
 
-        print("Time for Epoch: {}".format((time.time()-start_epoch)/60))
+        
