@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
 import torch 
+import json
 
 class TextDataset(torch.utils.data.Dataset):
     """
@@ -43,6 +44,26 @@ def read_imdb_split(split_dir):
 
     return texts, labels
 
+def extract_simplified(source, target, lines=8021122):
+    with open(target, 'w') as sr:
+        cnt = 0;
+        with open(source) as file:
+            line = file.readline()
+            while line:
+                cnt += 1
+                if cnt == lines:
+                    break
+                if cnt % 100_000 == 0:
+                    print(f'Processed {cnt}')
+                try:
+                    line = file.readline().strip()
+                    review_dict = json.loads(line)
+                    simplified = {'text':  review_dict['text'], 'stars': review_dict['stars']}
+                    simplified_text = json.dumps(simplified)
+                    sr.write(f'{simplified_text}\n')
+                except:
+                    print(f'Could not parse {line}')
+
 def read_yelp(data_path):
     """
     Reads Yelp data.
@@ -57,12 +78,13 @@ def read_yelp(data_path):
         - test_labels (list) : list of labels ranging from 0-4 (star rating).
     """
 
+    #preprocess data
+    extract_simplified(data_path, "./processed_yelp_reviews.json")
+
     # parse json into a dataframe
-    yelp_df = pd.read_json(data_path, lines=True)
-    print(yelp_df.columns)
+    yelp_df = pd.read_json("./processed_yelp_reviews.json", lines=True)
     # remove columns
     yelp_df = yelp_df[['text', 'stars']]
-    print(yelp_df.columns)
     texts = []
     labels = []
     for row in yelp_df.iterrows():
@@ -75,6 +97,8 @@ def read_yelp(data_path):
     train_texts, test_texts, train_labels, test_labels = train_test_split(texts, labels, test_size=.1)
 
     return train_texts, test_texts, train_labels, test_labels
+
+
 
 def load_and_preprocess(args, val=True):
 
