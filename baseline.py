@@ -17,7 +17,7 @@ def baseline(args):
 
     print("Loading Datasets")
     # load and preprocess the datasets.
-    args.dataloaders = load_and_preprocess(args, val=True)
+    args.dataloaders = load_and_preprocess(args)
     
     print("Creating Model")
     # load pretrained BERT and push to GPU.

@@ -32,10 +32,11 @@ def read_imdb_split(split_dir):
         - text (list)   : list of input sentences.
         - labels (list) : list of labels 0 (neg) and 1 (pos).
     """
-
+    # get directory
     split_dir = Path(split_dir)
     texts = []
     labels = []
+    # load imdb data by labels
     for label_dir in ["pos", "neg"]:
         for text_file in (split_dir/label_dir).iterdir():
             texts.append(text_file.read_text())
@@ -59,14 +60,12 @@ def read_yelp(data_path):
 
     # parse json into a dataframe
     yelp_df = pd.read_json(data_path, lines=True)
-    print(yelp_df.columns)
     # remove columns
     yelp_df = yelp_df[['text', 'stars']]
-    print(yelp_df.columns)
-    texts = []
-    labels = []
+
+    texts, labels = [], []
+
     for idx, row in yelp_df.iterrows():
-        print(row['text'])
         texts.append(row['text'])
         # start labels from 0 (auto one hot encode)
         labels.append(int(row['stars']) -1)
@@ -76,27 +75,35 @@ def read_yelp(data_path):
 
     return train_texts, test_texts, train_labels, test_labels
 
-def load_and_preprocess(args, val=True):
+def load_and_preprocess(args):
 
+    # load dataset.
     if args.dataset == "IMDb":
         train_texts, train_labels = read_imdb_split(args.train_path)
         test_texts, test_labels = read_imdb_split(args.test_path)
     elif args.dataset == "Yelp":
         train_texts, test_texts, train_labels, test_labels = read_yelp(args.data_path)
 
+    # create validation split.
     train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
+    # load tokenizer.
     tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
 
+    # create encodings.
     train_encodings = tokenizer(train_texts, truncation=True, padding=True)
     val_encodings = tokenizer(val_texts, truncation=True, padding=True)
     test_encodings = tokenizer(test_texts, truncation=True, padding=True)
+    print(test_encodings)
 
-
+    # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
     val_dataset = TextDataset(val_encodings, val_labels)
     test_dataset = TextDataset(test_encodings, test_labels)
 
+    print(test_dataset)
+
+    # create dataloaders.
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=16)
