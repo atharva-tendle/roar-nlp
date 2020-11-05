@@ -3,6 +3,7 @@ import argparse
 from transformers import BertForSequenceClassification, AdamW
 from utils import load_and_preprocess
 from train import train_and_validate
+from test import test
 
 
 
@@ -29,7 +30,11 @@ def baseline(args):
     
     print("Starting Training")
     # run training.
-    train_and_validate(args)
+    args = train_and_validate(args)
+
+    print("Starting Testing")
+
+    test(args)
 
 
 
