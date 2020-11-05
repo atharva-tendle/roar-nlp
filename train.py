@@ -25,5 +25,7 @@ def train_and_validate(args):
     
     print("Time for Epoch: {}".format((time.time()-start_epoch)/60))
 
+    args.model.save_pretrained("/work/cse896/atendle/imdb-train-base")
+
     return args
         

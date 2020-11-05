@@ -95,6 +95,8 @@ def load_and_preprocess(args):
     #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
     test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
 
+    tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
     #val_dataset = TextDataset(val_encodings, val_labels)

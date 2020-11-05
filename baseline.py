@@ -32,9 +32,9 @@ def baseline(args):
     # run training.
     args = train_and_validate(args)
 
-    print("Starting Testing")
+    # print("Starting Testing")
 
-    test(args)
+    # test(args)
 
 
 
