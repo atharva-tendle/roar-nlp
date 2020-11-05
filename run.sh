@@ -10,11 +10,11 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-type=fail
 #SBATCH --mail-user=atendle13.3.98@gmail.com
-#SBATCH --output=/work/cse896/atendle/out-files/imdb-baseline.out
+#SBATCH --output=/work/cse896/atendle/out-files/yelp-baseline-test.out
 
 export HF_DATASETS_CACHE=/work/cse896/atendle/.cache/datasets/
 export TRANSFORMERS_CACHE=/work/cse896/atendle/.cache/transformers/
 export HF_MODULES_CACHE=/work/cse896/atendle/.cache/huggingface/
 module load anaconda
 conda activate /work/vinod/gwirka/.conda/envs/nlp-pbi
-python -u $@ baseline.py --epochs 10 --dataset IMDb
+python -u $@ baseline.py --epochs 10 --dataset Yelp

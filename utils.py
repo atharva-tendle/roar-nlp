@@ -85,27 +85,25 @@ def load_and_preprocess(args):
         train_texts, test_texts, train_labels, test_labels = read_yelp(args.data_path)
 
     # create validation split.
-    train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
+    #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
     # load tokenizer.
     tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
-
+    
     # create encodings.
-    train_encodings = tokenizer(train_texts, truncation=True, padding=True)
-    val_encodings = tokenizer(val_texts, truncation=True, padding=True)
-    test_encodings = tokenizer(test_texts, truncation=True, padding=True)
-    print(test_encodings)
+    train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
+    #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
+    test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
-    val_dataset = TextDataset(val_encodings, val_labels)
+    #val_dataset = TextDataset(val_encodings, val_labels)
     test_dataset = TextDataset(test_encodings, test_labels)
 
-    print(test_dataset)
 
     # create dataloaders.
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+    #val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=16)
 
-    return {'train': train_loader, 'val': val_loader, 'test': test_loader}
+    return {'train': train_loader, 'test': test_loader}
