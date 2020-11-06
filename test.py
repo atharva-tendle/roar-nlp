@@ -1,4 +1,7 @@
 import torch
+import argparse
+from transformers import BertForSequenceClassification
+from utils import load_and_preprocess
 
 def test(args):
     
@@ -35,7 +38,7 @@ if __name__ == "__main__":
     # run baselines.
     args.train_path = "../imdb/aclImdb/train"
     args.test_path = "../imdb/aclImdb/test"
-
+    args.dataset = "IMDb"
     # load dataset
     print("Loading Datasets")
     # load and preprocess the datasets.
@@ -43,7 +46,8 @@ if __name__ == "__main__":
 
     print("Creating Model")
     # load pretrained BERT and push to GPU.
-    args.model = BertForSequenceClassification.from_pretrained('/work/cse896/atendle/imdb-train-base')
+    #args.model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
+    args.model = BertForSequenceClassification.from_pretrained(pretrained_model_name_or_path="/work/cse896/atendle/imdb-train-base/")
     args.model.to(args.device)
 
     # load model 

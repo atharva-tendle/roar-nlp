@@ -89,7 +89,7 @@ def load_and_preprocess(args, test=False):
 
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('/work/cse896/atendle/imdb-train-base')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-base-tok')
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
@@ -98,7 +98,7 @@ def load_and_preprocess(args, test=False):
     #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
     test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
 
-    tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+    #tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
