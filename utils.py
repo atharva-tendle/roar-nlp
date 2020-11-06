@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
@@ -98,7 +99,10 @@ def load_and_preprocess(args, test=False):
     #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
     test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
 
-    #tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+    if test:
+        pass
+    else:
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
@@ -125,6 +129,9 @@ def load_and_preprocess_random(args, test=False):
     # create validation split.
     #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
+    train_texts = random_text_process(train_texts)
+    test_texts = random_text_process(test_texts)
+
     # load tokenizer.
     if test:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-base-tok')
@@ -136,7 +143,10 @@ def load_and_preprocess_random(args, test=False):
     #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
     test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
 
-    #tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+    if test:
+        pass
+    else:
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
@@ -150,3 +160,18 @@ def load_and_preprocess_random(args, test=False):
     test_loader = DataLoader(test_dataset, batch_size=16)
 
     return {'train': train_loader, 'test': test_loader}
+
+
+
+def random_text_process(texts, probs=0.9):
+    new_texts = []
+    for i in range(len(texts)):
+        new_text = []
+        for idx, val in enumerate(texts[i].split(" ")):
+            if np.random.binomial(1, probs):
+                new_texts.append(val)
+            else:
+                new_texts.append("[UNK]")
+        new_train_texts.append(' '.join(new_texts))
+        assert "[UNK]" in new_texts[i]
+    return new_texts

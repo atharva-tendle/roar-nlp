@@ -1,4 +1,6 @@
 import torch
+import random
+import numpy as np
 import argparse
 from transformers import BertForSequenceClassification
 from utils import load_and_preprocess
@@ -36,7 +38,7 @@ if __name__ == "__main__":
     args.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     # set seed for reproducibility.
-    seed = configs.seed
+    seed = 42
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

@@ -3,13 +3,13 @@ import random
 import numpy as np
 import argparse
 from transformers import BertForSequenceClassification, AdamW
-from utils import load_and_preprocess
+from utils import load_and_preprocess_random
 from train import train_and_validate
 from test import test
 
 
 
-def baseline(args):
+def random_baseline(args):
     """
     Creates a baseline training run for the IMDb/Yelp dataset.
 
@@ -20,7 +20,7 @@ def baseline(args):
 
     print("Loading Datasets")
     # load and preprocess the datasets.
-    args.dataloaders = load_and_preprocess(args)
+    args.dataloaders = load_and_preprocess_random(args)
     
     print("Creating Model")
     # load pretrained BERT and push to GPU.
@@ -60,9 +60,9 @@ if __name__ == "__main__":
         # path to IMDb data.
         args.train_path = "../imdb/aclImdb/train"
         args.test_path = "../imdb/aclImdb/test"
-        baseline(args)
+        random_baseline(args)
 
     elif args.dataset == "Yelp":
         # path to Yelp data.
         args.data_path = "../yelp/yelp_academic_dataset_review.json"
-        baseline(args)
+        random_baseline(args)
