@@ -35,6 +35,15 @@ if __name__ == "__main__":
     # Add gpu.
     args.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+    # set seed for reproducibility.
+    seed = configs.seed
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    # gpu training specific seed settings.
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
     # run baselines.
     args.train_path = "../imdb/aclImdb/train"
     args.test_path = "../imdb/aclImdb/test"

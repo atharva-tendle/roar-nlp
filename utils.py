@@ -112,3 +112,41 @@ def load_and_preprocess(args, test=False):
     test_loader = DataLoader(test_dataset, batch_size=16)
 
     return {'train': train_loader, 'test': test_loader}
+
+
+def load_and_preprocess_random(args, test=False):
+    # load dataset.
+    if args.dataset == "IMDb":
+        train_texts, train_labels = read_imdb_split(args.train_path)
+        test_texts, test_labels = read_imdb_split(args.test_path)
+    elif args.dataset == "Yelp":
+        train_texts, test_texts, train_labels, test_labels = read_yelp(args.data_path)
+
+    # create validation split.
+    #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
+
+    # load tokenizer.
+    if test:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-base-tok')
+    else:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
+    
+    # create encodings.
+    train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
+    #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
+    test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
+
+    #tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+
+    # creat torch datasets.
+    train_dataset = TextDataset(train_encodings, train_labels)
+    #val_dataset = TextDataset(val_encodings, val_labels)
+    test_dataset = TextDataset(test_encodings, test_labels)
+
+
+    # create dataloaders.
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+    #val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=16)
+
+    return {'train': train_loader, 'test': test_loader}
