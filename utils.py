@@ -118,7 +118,7 @@ def load_and_preprocess(args, test=False):
     return {'train': train_loader, 'test': test_loader}
 
 
-def load_and_preprocess_random(args, test=False):
+def load_and_preprocess_random(args, test=False, probs=0.9):
     # load dataset.
     if args.dataset == "IMDb":
         train_texts, train_labels = read_imdb_split(args.train_path)
@@ -129,12 +129,12 @@ def load_and_preprocess_random(args, test=False):
     # create validation split.
     #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
-    train_texts = random_text_process(train_texts)
-    test_texts = random_text_process(test_texts)
+    train_texts = random_text_process(train_texts, probs=probs)
+    test_texts = random_text_process(test_texts, probs=probs)
 
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-base-tok')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-random-tok')
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
@@ -146,7 +146,7 @@ def load_and_preprocess_random(args, test=False):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
@@ -169,9 +169,9 @@ def random_text_process(texts, probs=0.9):
         new_text = []
         for idx, val in enumerate(texts[i].split(" ")):
             if np.random.binomial(1, probs):
-                new_texts.append(val)
+                new_text.append(val)
             else:
-                new_texts.append("[UNK]")
-        new_train_texts.append(' '.join(new_texts))
+                new_text.append("[UNK]")
+        new_texts.append(' '.join(new_text))
         assert "[UNK]" in new_texts[i]
     return new_texts

@@ -1,6 +1,6 @@
 import time
 
-def train_and_validate(args):
+def train_and_validate(args, save_path="/work/cse896/atendle/model"):
     print("Starting Training for {} epochs".format(args.epochs))
 
     train_loss, val_loss = [], []
@@ -25,7 +25,7 @@ def train_and_validate(args):
     
     print("Time for Epoch: {}".format((time.time()-start_epoch)/60))
 
-    args.model.save_pretrained("/work/cse896/atendle/imdb-train-base")
+    args.model.save_pretrained(save_path)
 
     return args
         
