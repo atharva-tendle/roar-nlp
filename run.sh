@@ -17,4 +17,5 @@ export TRANSFORMERS_CACHE=/work/cse896/atendle/.cache/transformers/
 export HF_MODULES_CACHE=/work/cse896/atendle/.cache/huggingface/
 module load anaconda
 conda activate /work/vinod/gwirka/.conda/envs/nlp-pbi
-python -u $@ baseline.py --epochs 10 --dataset IMDb
+# python -u $@ baseline.py --epochs 10 --dataset IMDb
+python -u $@ test.py 

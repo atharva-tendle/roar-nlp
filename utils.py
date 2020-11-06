@@ -75,7 +75,7 @@ def read_yelp(data_path):
 
     return train_texts, test_texts, train_labels, test_labels
 
-def load_and_preprocess(args):
+def load_and_preprocess(args, test=False):
 
     # load dataset.
     if args.dataset == "IMDb":
@@ -88,7 +88,10 @@ def load_and_preprocess(args):
     #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
     # load tokenizer.
-    tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
+    if test:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('/work/cse896/atendle/imdb-train-base')
+    else:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
     # create encodings.
     train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
