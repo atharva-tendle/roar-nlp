@@ -32,7 +32,7 @@ def baseline(args):
     
     print("Starting Training")
     # run training.
-    args = train_and_validate(args)
+    args = train_and_validate(args,  save_path="/work/cse896/atendle/imdb-train-base")
 
 
 

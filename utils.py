@@ -146,7 +146,7 @@ def load_and_preprocess_random(args, test=False, probs=0.9):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random-tok")
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random0.8-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
