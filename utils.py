@@ -118,7 +118,7 @@ def load_and_preprocess(args, test=False):
     return {'train': train_loader, 'test': test_loader}
 
 
-def load_and_preprocess_random(args, test=False, probs=0.9):
+def load_and_preprocess_random(args, test=False, t=0.1):
     # load dataset.
     if args.dataset == "IMDb":
         train_texts, train_labels = read_imdb_split(args.train_path)
@@ -129,8 +129,8 @@ def load_and_preprocess_random(args, test=False, probs=0.9):
     # create validation split.
     #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
-    train_texts = random_text_process(train_texts, probs=probs)
-    test_texts = random_text_process(test_texts, probs=probs)
+    train_texts = random_text_process(train_texts, t=t)
+    test_texts = random_text_process(test_texts, t=t)
 
     # load tokenizer.
     if test:
@@ -163,7 +163,7 @@ def load_and_preprocess_random(args, test=False, probs=0.9):
 
 
 
-def random_text_process(texts, probs=0.9):
+def random_chance_process(texts, probs=0.9):
     new_texts = []
     for i in range(len(texts)):
         new_text = []
@@ -173,5 +173,24 @@ def random_text_process(texts, probs=0.9):
             else:
                 new_text.append("[UNK]")
         new_texts.append(' '.join(new_text))
-        assert "[UNK]" in new_texts[i]
+        
     return new_texts
+
+def random_text_process(train_texts, t=0.1):
+    new_train_texts  = []
+
+    for i in range(len(train_texts)):
+        # get the current text
+        current_text = train_texts[i].split(" ")
+        # number of words to mask
+        n = int(len(current_text) * t)
+        # indices of words to mask
+        indices = np.random.choice(len(current_text), n, replace=False)
+
+        # mask words
+        for index in indices:
+            current_text[index] = "[UNK]"
+
+        new_train_texts.append(' '.join(current_text))
+
+    return new_train_texts

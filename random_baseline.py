@@ -20,7 +20,7 @@ def random_baseline(args):
 
     print("Loading Datasets")
     # load and preprocess the datasets.
-    args.dataloaders = load_and_preprocess_random(args, probs=0.8)
+    args.dataloaders = load_and_preprocess_random(args, t=0.1)
     
     print("Creating Model")
     # load pretrained BERT and push to GPU.
