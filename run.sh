@@ -10,7 +10,7 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-type=fail
 #SBATCH --mail-user=atendle13.3.98@gmail.com
-#SBATCH --output=/work/cse896/atendle/out-files/imdb-random0.8-baseline.out
+#SBATCH --output=/work/cse896/atendle/out-files/imdb-random_20.out
 
 export HF_DATASETS_CACHE=/work/cse896/atendle/.cache/datasets/
 export TRANSFORMERS_CACHE=/work/cse896/atendle/.cache/transformers/

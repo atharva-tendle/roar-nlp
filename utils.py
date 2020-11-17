@@ -134,7 +134,7 @@ def load_and_preprocess_random(args, test=False, t=0.1):
 
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-random-tok')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-random_20-tok')
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
@@ -146,7 +146,7 @@ def load_and_preprocess_random(args, test=False, t=0.1):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random0.8-tok")
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random_20-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
