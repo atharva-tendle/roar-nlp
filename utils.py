@@ -2,9 +2,13 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
 import torch 
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 
 class TextDataset(torch.utils.data.Dataset):
     """
@@ -161,6 +165,49 @@ def load_and_preprocess_random(args, test=False, t=0.1):
 
     return {'train': train_loader, 'test': test_loader}
 
+def load_and_preprocess_tfidf(args, test=False, t=0.1):
+    # load dataset.
+    if args.dataset == "IMDb":
+        train_texts, train_labels = read_imdb_split(args.train_path)
+        test_texts, test_labels = read_imdb_split(args.test_path)
+    elif args.dataset == "Yelp":
+        train_texts, test_texts, train_labels, test_labels = read_yelp(args.data_path)
+
+    # create validation split.
+    #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
+
+    train_texts = tfidf_mask(train_texts, t=t)
+    test_texts = tfidf_mask(test_texts, t=t)
+
+    # load tokenizer.
+    if test:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-tfidf_10-tok')
+    else:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
+    
+    # create encodings.
+    train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
+    #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
+    test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
+
+    if test:
+        pass
+    else:
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-tfidf_10-tok")
+
+    # creat torch datasets.
+    train_dataset = TextDataset(train_encodings, train_labels)
+    #val_dataset = TextDataset(val_encodings, val_labels)
+    test_dataset = TextDataset(test_encodings, test_labels)
+
+
+    # create dataloaders.
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+    #val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=16)
+
+    return {'train': train_loader, 'test': test_loader}
+
 
 
 def random_chance_process(texts, probs=0.9):
@@ -194,3 +241,56 @@ def random_text_process(train_texts, t=0.1):
         new_train_texts.append(' '.join(current_text))
 
     return new_train_texts
+
+def get_tfidf_rankings(feature_array, tfidf_matrix):
+
+    tfidf_rankings = []
+    stop_words = set(stopwords.words('english')) 
+
+    for index in tfidf_matrix.indices:
+        if feature_array[index] not in stop_words:
+            tfidf_rankings.append((feature_array[index], tfidf_matrix[0, index]))
+
+    return sorted(tfidf_rankings, key=lambda x:x[1])
+
+def tfidf_mask(texts, t=0.5):
+
+    vectorizer = TfidfVectorizer()
+    vectorizer.fit(texts)
+    feature_array = np.array(vectorizer.get_feature_names())
+    new_texts  = []
+    
+    for idx, train_text in enumerate(texts):
+        current_text = train_text.split(" ")
+        matching_text = train_text.lower().split(" ")
+        tfidf_matrix = vectorizer.transform(matching_text)
+        num_maskings = int(len(matching_text) * t)
+        masked = 0
+        tfidf_rankings = get_tfidf_rankings(feature_array, tfidf_matrix)
+
+        for tfidf_w in tfidf_rankings:
+            # perfect match
+            try:
+                w_index = matching_text.index(tfidf_w[0])
+                current_text[w_index] = "[UNK]"
+                masked += 1
+                if masked == num_maskings:
+                    break
+            # match with punctuations
+            except:
+                for idx, word in enumerate(matching_text):
+                    if tfidf_w[0] in word:
+                        current_text[idx] = "[UNK]"
+                        masked += 1
+                if masked == num_maskings:
+                    break
+                
+                
+        new_texts.append(' '.join(current_text))
+
+    return new_texts
+
+
+
+
+

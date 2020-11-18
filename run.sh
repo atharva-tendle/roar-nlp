@@ -10,13 +10,15 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-type=fail
 #SBATCH --mail-user=atendle13.3.98@gmail.com
-#SBATCH --output=/work/cse896/atendle/out-files/imdb-random_20.out
+#SBATCH --output=/work/cse896/atendle/out-files/imdb-tfidf_10.out
 
 export HF_DATASETS_CACHE=/work/cse896/atendle/.cache/datasets/
 export TRANSFORMERS_CACHE=/work/cse896/atendle/.cache/transformers/
 export HF_MODULES_CACHE=/work/cse896/atendle/.cache/huggingface/
 module load anaconda
 conda activate /work/vinod/gwirka/.conda/envs/nlp-pbi
-python -u $@ random_baseline.py --epochs 10 --dataset IMDb
+
+python -u $@ tfidf_baseline.py --epochs 10 --dataset IMDb
+# python -u $@ random_baseline.py --epochs 10 --dataset IMDb
 #python -u $@ baseline.py --epochs 20 --dataset IMDb
 #python -u $@ test.py 
