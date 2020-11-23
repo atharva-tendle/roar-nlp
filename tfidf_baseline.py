@@ -20,7 +20,7 @@ def tfidf_baseline(args):
 
     print("Loading Datasets")
     # load and preprocess the datasets.
-    args.dataloaders = load_and_preprocess_tfidf(args, t=0.1)
+    args.dataloaders = load_and_preprocess_tfidf(args, t=0.6)
     
     print("Creating Model")
     # load pretrained BERT and push to GPU.
@@ -32,7 +32,7 @@ def tfidf_baseline(args):
     
     print("Starting Training")
     # run training.
-    args = train_and_validate(args, save_path="/work/cse896/atendle/imdb-train-tfidf_10")
+    args = train_and_validate(args, save_path="/work/cse896/atendle/imdb-train-tfidf_60")
 
 
 

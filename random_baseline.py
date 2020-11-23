@@ -20,7 +20,7 @@ def random_baseline(args):
 
     print("Loading Datasets")
     # load and preprocess the datasets.
-    args.dataloaders = load_and_preprocess_random(args, t=0.2)
+    args.dataloaders = load_and_preprocess_random(args, t=0.8)
     
     print("Creating Model")
     # load pretrained BERT and push to GPU.
@@ -32,7 +32,7 @@ def random_baseline(args):
     
     print("Starting Training")
     # run training.
-    args = train_and_validate(args, save_path="/work/cse896/atendle/imdb-train-random_20")
+    args = train_and_validate(args, save_path="/work/cse896/atendle/imdb-train-random_chancee_80")
 
 
 

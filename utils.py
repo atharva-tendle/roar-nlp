@@ -6,9 +6,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
 import torch 
-import nltk
-nltk.download('stopwords')
-from nltk.corpus import stopwords
+
+STOP_WORDS = {'haven', 'if', 'has', 'is', 'are', 've', 'did', 'then', 'and', 'o', "won't", 'shan', 'until', "couldn't", 'most', "haven't", 'very', 'not', "you're", 'from', 'wouldn', "you'd", 'y', "weren't", 'the', 'you', 'needn', 'too', 'because', 'any', 'just', 'mustn', 'doing', 'or', 'him', 'her', 'wasn', 'by', 'in', 'theirs', "should've", 'some', 'now', 'ain', 'above', 'both', 'don', "don't", 's', 'ours', 'once', 'they', 'am', 'there', 'so', 'weren', 'himself', 'she', "needn't", 'shouldn', 'i', 'herself', "it's", 'when', 'other', 'can', 'didn', "hadn't", 'no', 'over', 'few', 'down', 'here', "mustn't", 'them', 'under', 'that', 'be', 'your', 'where', 'aren', "you'll", 'below', 'into', 'ourselves', "aren't", 'doesn', 'themselves', 'my', 'its', 'who', 'as', "hasn't", 'further', 'our', 'own', 'it', 'being', 'on', "you've", 'of', 'such', 'those', 'all', 'yourselves', 'should', 'while', 'were', 'been', "doesn't", 'does', 'out', 'what', 'during', 'his', 'he', 'had', 'through', 'an', 'their', 'again', "she's", 'after', 'this', 'these', 'but', 'we', 'me', 'how', 'will', "mightn't", 'yours', 'itself', 'against', 'ma', 'do', 'having', 'nor', 'm', 'hadn', "wasn't", 'before', 'between', 'a', 'won', "didn't", 'myself', 'more', 't', 're', 'd', "wouldn't", "shan't", 'each', 'isn', 'for', "isn't", 'll', "shouldn't", "that'll", 'with', 'yourself', 'to', 'couldn', 'at', 'mightn', 'whom', 'which', 'why', 'same', 'up', 'only', 'than', 'have', 'about', 'off', 'hers', 'hasn', 'was'}
+
 
 class TextDataset(torch.utils.data.Dataset):
     """
@@ -133,12 +133,14 @@ def load_and_preprocess_random(args, test=False, t=0.1):
     # create validation split.
     #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
-    train_texts = random_text_process(train_texts, t=t)
-    test_texts = random_text_process(test_texts, t=t)
+    #train_texts = random_text_process(train_texts, t=t)
+    #test_texts = random_text_process(test_texts, t=t)
+    train_texts = random_chance_process(train_texts, t=t)
+    test_texts = random_chance_process(test_texts, t=t)
 
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-random_20-tok')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-random_chance_80-tok')
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
@@ -150,7 +152,7 @@ def load_and_preprocess_random(args, test=False, t=0.1):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random_20-tok")
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-random_chance_80-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
@@ -181,7 +183,7 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
 
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-tfidf_10-tok')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-tfidf_60-tok')
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
@@ -193,7 +195,7 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-tfidf_10-tok")
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-tfidf_60-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
@@ -210,12 +212,12 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
 
 
 
-def random_chance_process(texts, probs=0.9):
+def random_chance_process(texts, t=0.9):
     new_texts = []
     for i in range(len(texts)):
         new_text = []
         for idx, val in enumerate(texts[i].split(" ")):
-            if np.random.binomial(1, probs):
+            if np.random.binomial(1, t):
                 new_text.append(val)
             else:
                 new_text.append("[UNK]")
@@ -245,10 +247,9 @@ def random_text_process(train_texts, t=0.1):
 def get_tfidf_rankings(feature_array, tfidf_matrix):
 
     tfidf_rankings = []
-    stop_words = set(stopwords.words('english')) 
 
     for index in tfidf_matrix.indices:
-        if feature_array[index] not in stop_words:
+        if feature_array[index] not in STOP_WORDS:
             tfidf_rankings.append((feature_array[index], tfidf_matrix[0, index]))
 
     return sorted(tfidf_rankings, key=lambda x:x[1])
