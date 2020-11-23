@@ -103,8 +103,7 @@ def load_and_preprocess(args, test=False):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok"
-)
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
@@ -131,14 +130,12 @@ def load_and_preprocess_random(args, test=False, t=0.1):
     # create validation split.
     #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
 
-    #train_texts = random_text_process(train_texts, t=t)
-    #test_texts = random_text_process(test_texts, t=t)
-    train_texts = random_chance_process(train_texts, t=t)
-    test_texts = random_chance_process(test_texts, t=t)
+    train_texts = random_text_process(train_texts, t=t)
+    test_texts = random_text_process(test_texts, t=t)
 
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-random_chance_80-tok')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path=args.tokenizer)
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
@@ -208,20 +205,6 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
 
     return {'train': train_loader, 'test': test_loader}
 
-
-
-def random_chance_process(texts, t=0.9):
-    new_texts = []
-    for i in range(len(texts)):
-        new_text = []
-        for idx, val in enumerate(texts[i].split(" ")):
-            if np.random.binomial(1, t):
-                new_text.append(val)
-            else:
-                new_text.append("[UNK]")
-        new_texts.append(' '.join(new_text))
-        
-    return new_texts
 
 def random_text_process(train_texts, t=0.1):
     new_train_texts  = []

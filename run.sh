@@ -10,7 +10,7 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-type=fail
 #SBATCH --mail-user=atendle13.3.98@gmail.com
-#SBATCH --output=/work/cse896/atendle/out-files/baseline-test.out
+#SBATCH --output=/work/cse896/atendle/out-files/random70-test.out
 
 export HF_DATASETS_CACHE=/work/cse896/atendle/.cache/datasets/
 export TRANSFORMERS_CACHE=/work/cse896/atendle/.cache/transformers/
@@ -21,4 +21,4 @@ conda activate /work/vinod/gwirka/.conda/envs/nlp-pbi
 #python -u $@ tfidf_baseline.py --epochs 10 --dataset IMDb
 # python -u $@ random_baseline.py --epochs 10 --dataset IMDb
 #python -u $@ baseline.py --epochs 20 --dataset IMDb
-python -u $@ test.py --model-type "baseline" --model "/work/cse896/atendle/model-files/baseline/baseline" --tokenizer "/work/cse896/atendle/model-files/baseline/baseline-tok"
+python -u $@ test.py --model-type "random" --model "/work/cse896/atendle/model-files/random_percent/random_70" --tokenizer "/work/cse896/atendle/model-files/random_percent/random_70-tok"

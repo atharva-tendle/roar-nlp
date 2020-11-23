@@ -3,7 +3,7 @@ import random
 import numpy as np
 import argparse
 from transformers import BertForSequenceClassification
-from utils import load_and_preprocess
+from utils import load_and_preprocess, load_and_preprocess_random
 
 def test(args):
     
@@ -60,8 +60,9 @@ if __name__ == "__main__":
     if args.model_type == "baseline":
         # load and preprocess the datasets.
         args.dataloaders = load_and_preprocess(args, test=True)
-    else:
-        pass
+    elif args.model_type == "random":
+        # load and preprocess the datasets.
+        args.dataloaders = load_and_preprocess(args, test=True)
 
     print("Creating Model")
     # load pretrained BERT and push to GPU.
