@@ -5,22 +5,35 @@ import argparse
 from transformers import BertForSequenceClassification
 from utils import load_and_preprocess, load_and_preprocess_random
 
-def test(args):
+def test(args): 
+    """
+    Evaluates a pretrained model.
+
+    params:
+        args (argparser) : List of arguments for testing 
+
+    """
     
+    # tracking metrics
     test_loss = []
     test_batches = 0
 
+    # set to eval mode.
     args.model.eval()
-
     with torch.no_grad():
         for batch in args.dataloaders['test']:
-
+            
+            # inputs for model
             input_ids = batch['input_ids'].to(args.device)
             attention_mask = batch['attention_mask'].to(args.device)
             labels = batch['labels'].to(args.device)
 
+            # get predictions
             outputs = args.model(input_ids, attention_mask=attention_mask, labels=labels)
+            
+            # compute loss
             loss = outputs[0]
+            
             test_loss.append(loss)
             test_batches += 1
 
@@ -35,7 +48,6 @@ if __name__ == "__main__":
     parser.add_argument('--model-type', type=str, default="baseline", help="FIE")
     parser.add_argument('--model', type=str, default="/work/cse896/atendle/model-files/baseline", help='model path')
     parser.add_argument('--tokenizer', type=str, default="/work/cse896/atendle/model-files/baseline-tok", help='tokenizer')
-    parser.add_argument('--dataset', type=str, default='IMDb', help='name of the dataset used for fine-tuning.')
     args = parser.parse_args()
 
     # Add gpu.

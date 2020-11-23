@@ -7,6 +7,7 @@ from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
 import torch 
 
+# STOP WORDS for TF-IDF masking
 STOP_WORDS = {'haven', 'if', 'has', 'is', 'are', 've', 'did', 'then', 'and', 'o', "won't", 'shan', 'until', "couldn't", 'most', "haven't", 'very', 'not', "you're", 'from', 'wouldn', "you'd", 'y', "weren't", 'the', 'you', 'needn', 'too', 'because', 'any', 'just', 'mustn', 'doing', 'or', 'him', 'her', 'wasn', 'by', 'in', 'theirs', "should've", 'some', 'now', 'ain', 'above', 'both', 'don', "don't", 's', 'ours', 'once', 'they', 'am', 'there', 'so', 'weren', 'himself', 'she', "needn't", 'shouldn', 'i', 'herself', "it's", 'when', 'other', 'can', 'didn', "hadn't", 'no', 'over', 'few', 'down', 'here', "mustn't", 'them', 'under', 'that', 'be', 'your', 'where', 'aren', "you'll", 'below', 'into', 'ourselves', "aren't", 'doesn', 'themselves', 'my', 'its', 'who', 'as', "hasn't", 'further', 'our', 'own', 'it', 'being', 'on', "you've", 'of', 'such', 'those', 'all', 'yourselves', 'should', 'while', 'were', 'been', "doesn't", 'does', 'out', 'what', 'during', 'his', 'he', 'had', 'through', 'an', 'their', 'again', "she's", 'after', 'this', 'these', 'but', 'we', 'me', 'how', 'will', "mightn't", 'yours', 'itself', 'against', 'ma', 'do', 'having', 'nor', 'm', 'hadn', "wasn't", 'before', 'between', 'a', 'won', "didn't", 'myself', 'more', 't', 're', 'd', "wouldn't", "shan't", 'each', 'isn', 'for', "isn't", 'll', "shouldn't", "that'll", 'with', 'yourself', 'to', 'couldn', 'at', 'mightn', 'whom', 'which', 'why', 'same', 'up', 'only', 'than', 'have', 'about', 'off', 'hers', 'hasn', 'was'}
 
 
@@ -25,7 +26,6 @@ class TextDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.labels)
-
 
 def read_imdb_split(split_dir):
     """
@@ -80,8 +80,11 @@ def read_yelp(data_path):
 
     return train_texts, test_texts, train_labels, test_labels
 
-def load_and_preprocess(args, test=False):
 
+def load_and_preprocess(args, test=False):
+    """
+    Loads Data for baseline experiment.
+    """
     # load dataset.
     if args.dataset == "IMDb":
         train_texts, train_labels = read_imdb_split(args.train_path)
@@ -118,8 +121,11 @@ def load_and_preprocess(args, test=False):
 
     return {'train': train_loader, 'test': test_loader}
 
-
 def load_and_preprocess_random(args, test=False, t=0.1):
+    """
+    Loads Data for Random FIE experiments
+    """
+
     # load dataset.
     if args.dataset == "IMDb":
         train_texts, train_labels = read_imdb_split(args.train_path)
@@ -163,6 +169,10 @@ def load_and_preprocess_random(args, test=False, t=0.1):
     return {'train': train_loader, 'test': test_loader}
 
 def load_and_preprocess_tfidf(args, test=False, t=0.1):
+    """
+    Loads Data for TF-IDF FIE experiments.
+    """
+
     # load dataset.
     if args.dataset == "IMDb":
         train_texts, train_labels = read_imdb_split(args.train_path)
@@ -205,8 +215,10 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
 
     return {'train': train_loader, 'test': test_loader}
 
-
 def random_text_process(train_texts, t=0.1):
+    """
+    Masks inputs randomly
+    """
     new_train_texts  = []
 
     for i in range(len(train_texts)):
@@ -226,7 +238,9 @@ def random_text_process(train_texts, t=0.1):
     return new_train_texts
 
 def get_tfidf_rankings(feature_array, tfidf_matrix):
-
+    """
+    Generates TF-IDF rankings for given input.
+    """
     tfidf_rankings = []
 
     for index in tfidf_matrix.indices:
@@ -236,10 +250,17 @@ def get_tfidf_rankings(feature_array, tfidf_matrix):
     return sorted(tfidf_rankings, key=lambda x:x[1])
 
 def tfidf_mask(texts, t=0.5):
+    """
+    Masks inputs using TF-IDF rankings.
+    """
 
+    # create TF-IDF vectorizer.
     vectorizer = TfidfVectorizer()
+    # fit the corpus.
     vectorizer.fit(texts)
+    # get list of feature names.
     feature_array = np.array(vectorizer.get_feature_names())
+    # list to store masked inputs.
     new_texts  = []
     
     for idx, train_text in enumerate(texts):
@@ -251,14 +272,14 @@ def tfidf_mask(texts, t=0.5):
         tfidf_rankings = get_tfidf_rankings(feature_array, tfidf_matrix)
 
         for tfidf_w in tfidf_rankings:
-            # perfect match
+            # perfect match.
             try:
                 w_index = matching_text.index(tfidf_w[0])
                 current_text[w_index] = "[UNK]"
                 masked += 1
                 if masked == num_maskings:
                     break
-            # match with punctuations
+            # match with punctuations.
             except:
                 for idx, word in enumerate(matching_text):
                     if tfidf_w[0] in word:
