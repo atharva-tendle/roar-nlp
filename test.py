@@ -32,7 +32,7 @@ def test(args):
 if __name__ == "__main__":
     # Parse Arguments.
     parser = argparse.ArgumentParser()
-    parse.add_argument('--model-type', type=str, default="baseline", help="FIE")
+    parser.add_argument('--model-type', type=str, default="baseline", help="FIE")
     parser.add_argument('--model', type=str, default="/work/cse896/atendle/model-files/baseline", help='model path')
     parser.add_argument('--tokenizer', type=str, default="/work/cse896/atendle/model-files/baseline-tok", help='tokenizer')
     parser.add_argument('--dataset', type=str, default='IMDb', help='name of the dataset used for fine-tuning.')

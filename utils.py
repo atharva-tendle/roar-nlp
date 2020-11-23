@@ -103,7 +103,8 @@ def load_and_preprocess(args, test=False):
     if test:
         pass
     else:
-        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok")
+        tokenizer.save_pretrained("/work/cse896/atendle/imdb-train-base-tok"
+)
 
     # creat torch datasets.
     train_dataset = TextDataset(train_encodings, train_labels)
