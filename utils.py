@@ -89,12 +89,9 @@ def load_and_preprocess(args, test=False):
     elif args.dataset == "Yelp":
         train_texts, test_texts, train_labels, test_labels = read_yelp(args.data_path)
 
-    # create validation split.
-    #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
-
     # load tokenizer.
     if test:
-        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/cse896/atendle/imdb-train-base-tok')
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path=args.tokenizer)
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     

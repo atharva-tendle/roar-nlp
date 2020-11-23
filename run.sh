@@ -19,6 +19,6 @@ module load anaconda
 conda activate /work/vinod/gwirka/.conda/envs/nlp-pbi
 
 #python -u $@ tfidf_baseline.py --epochs 10 --dataset IMDb
-python -u $@ random_baseline.py --epochs 10 --dataset IMDb
+# python -u $@ random_baseline.py --epochs 10 --dataset IMDb
 #python -u $@ baseline.py --epochs 20 --dataset IMDb
-#python -u $@ test.py 
+python -u $@ test.py --model-type "baseline" --model "/work/cse896/atendle/model-files/baseline/baseline" --tokenizer "/work/cse896/atendle/model-files/baseline/baseline-tok"

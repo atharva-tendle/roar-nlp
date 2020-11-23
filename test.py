@@ -32,6 +32,10 @@ def test(args):
 if __name__ == "__main__":
     # Parse Arguments.
     parser = argparse.ArgumentParser()
+    parse.add_argument('--model-type', type=str, default="baseline", help="FIE")
+    parser.add_argument('--model', type=str, default="/work/cse896/atendle/model-files/baseline", help='model path')
+    parser.add_argument('--tokenizer', type=str, default="/work/cse896/atendle/model-files/baseline-tok", help='tokenizer')
+    parser.add_argument('--dataset', type=str, default='IMDb', help='name of the dataset used for fine-tuning.')
     args = parser.parse_args()
 
     # Add gpu.
@@ -52,13 +56,17 @@ if __name__ == "__main__":
     args.dataset = "IMDb"
     # load dataset
     print("Loading Datasets")
-    # load and preprocess the datasets.
-    args.dataloaders = load_and_preprocess(args, test=True)
+
+    if args.model_type == "baseline":
+        # load and preprocess the datasets.
+        args.dataloaders = load_and_preprocess(args, test=True)
+    else:
+        pass
 
     print("Creating Model")
     # load pretrained BERT and push to GPU.
     #args.model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
-    args.model = BertForSequenceClassification.from_pretrained(pretrained_model_name_or_path="/work/cse896/atendle/imdb-train-base/")
+    args.model = BertForSequenceClassification.from_pretrained(pretrained_model_name_or_path=args.model)
     args.model.to(args.device)
 
     # load model 
