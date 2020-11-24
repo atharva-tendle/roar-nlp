@@ -67,7 +67,7 @@ if __name__ == "__main__":
     if args.dataset == "IMDb":
         # path to IMDb data.
         args.train_path = "/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/train"
-        args.test_path = "/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/train"
+        args.test_path = "/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/test"
         ig_baseline(args)
 
     elif args.dataset == "Yelp":
