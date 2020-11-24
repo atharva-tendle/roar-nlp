@@ -229,6 +229,9 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
     if args.label_dependent_masking:
         label_dependent_masking=args.label_dependent_masking
     
+    print("t: {}".format(t))
+    print("Using ldm? {}".format(label_dependent_masking))
+    
     print("Loading data.")
     if args.dataset == "IMDb":
         train_texts, train_labels, train_filenames = read_imdb_split(args.train_path, return_filenames=True)
@@ -262,7 +265,8 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
     # apply masks
     for i in range(len(train_encodings)):
         # if i%100 == 0: print("~{:.2f}%".format(i/len(train_encodings)))
-        num_to_mask = int(len(train_encodings[i]) * t)
+        num_to_mask = int(len(train_encodings['input_ids'][i]) * t)
+        
         attribution = attributions[train_filenames[i]][1:-1] # [1:-1] := Attributions have the form [CLS] + encoding + [SEP]     
         
         if label_dependent_masking:
