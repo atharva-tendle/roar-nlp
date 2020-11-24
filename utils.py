@@ -261,8 +261,8 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
     
     # apply masks
     for i in range(len(train_encodings)):
-        if i%100 == 0: print("~{:.2f}%".format(i/len(train_encodings)))
-        num_to_mask = len(train_encodings[i]) * t 
+        # if i%100 == 0: print("~{:.2f}%".format(i/len(train_encodings)))
+        num_to_mask = int(len(train_encodings[i]) * t)
         attribution = attributions[train_filenames[i]][1:-1] # [1:-1] := Attributions have the form [CLS] + encoding + [SEP]     
         
         if label_dependent_masking:
@@ -276,11 +276,11 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
             sorted_attribution_idxes = np.argsort(attribution) #smallest to largest
             
             if(train_labels[i]):
-                for j in np.fliplr(sorted_attribution_idxes)[:num_to_mask]:
-                    train_encodings[i][j] = 100 # replace with unk token id
+                for j in np.flip(sorted_attribution_idxes, axis=0)[:num_to_mask]:
+                    train_encodings['input_ids'][i][j] = 100 # replace with unk token id
             else:
                 for j in sorted_attribution_idxes[:num_to_mask]:
-                    train_encodings[i][j] = 100 # replace with unk token id
+                    train_encodings['input_ids'][i][j] = 100 # replace with unk token id
         else:
             """
             Replace the tokens whose attributions have the highest magnitude, regardless of label.
@@ -290,8 +290,8 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
             
             sorted_attribution_idxes = np.argsort([ abs(x) for x in attribution ])
             
-            for j in np.fliplr(sorted_attribution_idxes)[:num_to_mask]:
-                train_encodings[i][j] = 100 # replace with unk token id
+            for j in np.flip(sorted_attribution_idxes, axis=0)[:num_to_mask]:
+                train_encodings['input_ids'][i][j] = 100 # replace with unk token id
                 
                 
     if test:
