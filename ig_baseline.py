@@ -3,7 +3,7 @@ import random
 import numpy as np
 import argparse
 from transformers import BertForSequenceClassification, AdamW
-from utils import load_and_preprocess_random
+from utils import load_and_preprocess_ig
 from train import train_and_validate
 from test import test
 
@@ -32,7 +32,13 @@ def ig_baseline(args):
     
     print("Starting Training")
     # run training.
-    args = train_and_validate(args, save_path="/work/vinod/gwirka/classes/nlp/roar-cache/imdb-train-ig_{}".format(int(args.t * 10)))
+    
+    if args.label_dependent_masking:
+        save_path = "/work/vinod/gwirka/classes/nlp/roar-cache/imdb-train-ig_{}_ldm".format(int(args.t * 10))
+    else:
+        save_path = "/work/vinod/gwirka/classes/nlp/roar-cache/imdb-train-ig_{}".format(int(args.t * 10))
+    
+    args = train_and_validate(args, save_path=save_path)
 
 
 
@@ -60,8 +66,8 @@ if __name__ == "__main__":
     # run ig baselines.
     if args.dataset == "IMDb":
         # path to IMDb data.
-        args.train_path = "/work/vinod/gwirka/classes/nlp/data/imdb/aclImdb/train"
-        args.test_path = "/work/vinod/gwirka/classes/nlp/data/imdb/aclImdb/train"
+        args.train_path = "/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/train"
+        args.test_path = "/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/train"
         ig_baseline(args)
 
     elif args.dataset == "Yelp":

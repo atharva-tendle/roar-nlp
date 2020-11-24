@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from transformers import BertTokenizerFast
 from torch.utils.data import DataLoader
 import torch 
+import pickle
 
 # STOP WORDS for TF-IDF masking
 STOP_WORDS = {'haven', 'if', 'has', 'is', 'are', 've', 'did', 'then', 'and', 'o', "won't", 'shan', 'until', "couldn't", 'most', "haven't", 'very', 'not', "you're", 'from', 'wouldn', "you'd", 'y', "weren't", 'the', 'you', 'needn', 'too', 'because', 'any', 'just', 'mustn', 'doing', 'or', 'him', 'her', 'wasn', 'by', 'in', 'theirs', "should've", 'some', 'now', 'ain', 'above', 'both', 'don', "don't", 's', 'ours', 'once', 'they', 'am', 'there', 'so', 'weren', 'himself', 'she', "needn't", 'shouldn', 'i', 'herself', "it's", 'when', 'other', 'can', 'didn', "hadn't", 'no', 'over', 'few', 'down', 'here', "mustn't", 'them', 'under', 'that', 'be', 'your', 'where', 'aren', "you'll", 'below', 'into', 'ourselves', "aren't", 'doesn', 'themselves', 'my', 'its', 'who', 'as', "hasn't", 'further', 'our', 'own', 'it', 'being', 'on', "you've", 'of', 'such', 'those', 'all', 'yourselves', 'should', 'while', 'were', 'been', "doesn't", 'does', 'out', 'what', 'during', 'his', 'he', 'had', 'through', 'an', 'their', 'again', "she's", 'after', 'this', 'these', 'but', 'we', 'me', 'how', 'will', "mightn't", 'yours', 'itself', 'against', 'ma', 'do', 'having', 'nor', 'm', 'hadn', "wasn't", 'before', 'between', 'a', 'won', "didn't", 'myself', 'more', 't', 're', 'd', "wouldn't", "shan't", 'each', 'isn', 'for', "isn't", 'll', "shouldn't", "that'll", 'with', 'yourself', 'to', 'couldn', 'at', 'mightn', 'whom', 'which', 'why', 'same', 'up', 'only', 'than', 'have', 'about', 'off', 'hers', 'hasn', 'was'}
@@ -222,6 +223,13 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
 
 def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=False):
     # load dataset.
+    
+    if args.t:
+        t=args.t
+    if args.label_dependent_masking:
+        label_dependent_masking=args.label_dependent_masking
+    
+    print("Loading data.")
     if args.dataset == "IMDb":
         train_texts, train_labels, train_filenames = read_imdb_split(args.train_path, return_filenames=True)
         test_texts, test_labels = read_imdb_split(args.test_path)
@@ -233,24 +241,27 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
 
 
     # load tokenizer.
+    print("Loading tokenizer.")
     if test:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/vinod/gwirka/classes/nlp/roar-cache/model-files/baseline/imdb-train-base-tok')
     else:
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
     # create encodings.
+    print("Creating encodings.") # Exceeding memory limit here.
     train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
     #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
     test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
 
     # load attributions
+    print("Applying masks.")
     infile = open("/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/train/imdb_train_gpu_attr_dict.p", "rb")
     attributions = pickle.load(infile)
     infile.close()
     
     # apply masks
     for i in range(len(train_encodings)):
-        
+        if i%100 == 0: print("~{:.2f}%".format(i/len(train_encodings)))
         num_to_mask = len(train_encodings[i]) * t 
         attribution = attributions[train_filenames[i]][1:-1] # [1:-1] := Attributions have the form [CLS] + encoding + [SEP]     
         
