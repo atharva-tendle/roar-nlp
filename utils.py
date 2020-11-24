@@ -27,7 +27,7 @@ class TextDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.labels)
 
-def read_imdb_split(split_dir):
+def read_imdb_split(split_dir, return_filenames=False):
     """
     Reads IMDb data.
 
@@ -41,13 +41,17 @@ def read_imdb_split(split_dir):
     split_dir = Path(split_dir)
     texts = []
     labels = []
+    filenames = []
     # load imdb data by labels
     for label_dir in ["pos", "neg"]:
         for text_file in (split_dir/label_dir).iterdir():
             texts.append(text_file.read_text())
             labels.append(0 if label_dir is "neg" else 1)
-
-    return texts, labels
+            filenames.append(text_file.parts[-1])
+    if return_filenames:
+        return texts, labels, filenames
+    else:
+        return texts, labels
 
 def read_yelp(data_path):
     """
@@ -207,6 +211,87 @@ def load_and_preprocess_tfidf(args, test=False, t=0.1):
     #val_dataset = TextDataset(val_encodings, val_labels)
     test_dataset = TextDataset(test_encodings, test_labels)
 
+
+    # create dataloaders.
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+    #val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=16)
+
+    return {'train': train_loader, 'test': test_loader}
+
+
+def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=False):
+    # load dataset.
+    if args.dataset == "IMDb":
+        train_texts, train_labels, train_filenames = read_imdb_split(args.train_path, return_filenames=True)
+        test_texts, test_labels = read_imdb_split(args.test_path)
+    elif args.dataset == "Yelp":
+        train_texts, test_texts, train_labels, test_labels = read_yelp(args.data_path)
+        
+    # create validation split.
+    #train_texts, val_texts, train_labels, val_labels = train_test_split(train_texts, train_labels, test_size=.2)
+
+
+    # load tokenizer.
+    if test:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained(pretrained_model_name_or_path='/work/vinod/gwirka/classes/nlp/roar-cache/model-files/baseline/imdb-train-base-tok')
+    else:
+        tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
+    
+    # create encodings.
+    train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
+    #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
+    test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
+
+    # load attributions
+    infile = open("/work/vinod/gwirka/classes/nlp/roar-nlp/data/imdb/aclImdb/train/imdb_train_gpu_attr_dict.p", "rb")
+    attributions = pickle.load(infile)
+    infile.close()
+    
+    # apply masks
+    for i in range(len(train_encodings)):
+        
+        num_to_mask = len(train_encodings[i]) * t 
+        attribution = attributions[train_filenames[i]][1:-1] # [1:-1] := Attributions have the form [CLS] + encoding + [SEP]     
+        
+        if label_dependent_masking:
+            """
+            If an instance is labeled positive, remove the tokens with the most positive attributions, 
+            if negative remove the most negative.
+            
+            This approach is more adversarial, and should push the model towards making incorrect choices.
+            """
+            
+            sorted_attribution_idxes = np.argsort(attribution) #smallest to largest
+            
+            if(train_labels[i]):
+                for j in sorted_attribution_idxes.reverse()[:num_to_mask]:
+                    train_encodings[i][j] = 100 # replace with unk token id
+            else:
+                for j in sorted_attribution_idxes[:num_to_mask]:
+                    train_encodings[i][j] = 100 # replace with unk token id
+        else:
+            """
+            Replace the tokens whose attributions have the highest magnitude, regardless of label.
+            
+            This approach removes meaningful information and pushes the model towards random guessing.
+            """
+            
+            sorted_attribution_idxes = np.argsort([ abs(x) for x in attribution ])
+            
+            for j in sorted_attribution_idxes.reverse()[:num_to_mask]:
+                train_encodings[i][j] = 100 # replace with unk token id
+                
+                
+    if test:
+        pass
+    else:
+        tokenizer.save_pretrained("/work/vinod/gwirka/classes/nlp/roar-cache/model-files/ig/imdb-train-ig_10-tok")
+
+    # creat torch datasets.
+    train_dataset = TextDataset(train_encodings, train_labels)
+    #val_dataset = TextDataset(val_encodings, val_labels)
+    test_dataset = TextDataset(test_encodings, test_labels)
 
     # create dataloaders.
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
