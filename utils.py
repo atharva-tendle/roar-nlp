@@ -248,7 +248,7 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
         tokenizer = BertTokenizerFast(vocab_file="./bert-base-uncased.txt").from_pretrained('bert-base-uncased')
     
     # create encodings.
-    print("Creating encodings.") # Exceeding memory limit here.
+    print("Creating encodings.")
     train_encodings = tokenizer(train_texts, truncation=True, max_length=128, padding='max_length')
     #val_encodings = tokenizer(val_texts, truncation=True, max_length=128, padding='max_length')
     test_encodings = tokenizer(test_texts, truncation=True, max_length=128, padding='max_length')
@@ -276,7 +276,7 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
             sorted_attribution_idxes = np.argsort(attribution) #smallest to largest
             
             if(train_labels[i]):
-                for j in sorted_attribution_idxes.reverse()[:num_to_mask]:
+                for j in np.fliplr(sorted_attribution_idxes)[:num_to_mask]:
                     train_encodings[i][j] = 100 # replace with unk token id
             else:
                 for j in sorted_attribution_idxes[:num_to_mask]:
@@ -290,7 +290,7 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
             
             sorted_attribution_idxes = np.argsort([ abs(x) for x in attribution ])
             
-            for j in sorted_attribution_idxes.reverse()[:num_to_mask]:
+            for j in np.fliplr(sorted_attribution_idxes)[:num_to_mask]:
                 train_encodings[i][j] = 100 # replace with unk token id
                 
                 
