@@ -263,11 +263,26 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
     infile.close()
     
     # apply masks
-    for i in range(len(train_encodings)):
-        # if i%100 == 0: print("~{:.2f}%".format(i/len(train_encodings)))
+    
+    print("n : {}".format(len(train_encodings['input_ids'])))
+    
+    for i in range(len(train_encodings['input_ids'])):
+        if i%1000 == 0: print("~{:.2f}%".format(i/len(train_encodings['input_ids'])))
         num_to_mask = int(len(train_encodings['input_ids'][i]) * t)
         
-        attribution = attributions[train_filenames[i]][1:-1] # [1:-1] := Attributions have the form [CLS] + encoding + [SEP]     
+        # if i == 0:
+        #     print("Num masked on one example: {}".format(num_to_mask))
+        #     print(train_encodings['input_ids'][0])
+        
+        # print(train_encodings['input_ids'][0])
+        # print(tokenizer.convert_ids_to_tokens(train_encodings['input_ids'][i]))
+        
+        attribution = attributions[train_filenames[i]][:-3] + [0.0] 
+        """
+        The attributions are of length 130. The first and last elements need to remain, because the tokenizer does
+        generate [CLS] and [SEP] tokens (which have attribution weights of 0.0), so the last two non-special tokens
+        need to be discarded.
+        """
         
         if label_dependent_masking:
             """
@@ -294,10 +309,12 @@ def load_and_preprocess_ig(args, test=False, t=0.1, label_dependent_masking=Fals
             
             sorted_attribution_idxes = np.argsort([ abs(x) for x in attribution ])
             
+            
             for j in np.flip(sorted_attribution_idxes, axis=0)[:num_to_mask]:
                 train_encodings['input_ids'][i][j] = 100 # replace with unk token id
                 
-                
+        # print(tokenizer.convert_ids_to_tokens(train_encodings['input_ids'][i]))
+
     if test:
         pass
     else:
